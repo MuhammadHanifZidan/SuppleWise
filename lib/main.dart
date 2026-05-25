@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'supplier.dart'; // Import supplier.dart
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -115,7 +116,7 @@ class _SplashScreenState extends State<SplashScreen>
           Navigator.of(context).pushReplacement(
             PageRouteBuilder(
               transitionDuration: const Duration(milliseconds: 600),
-              pageBuilder: (_, __, ___) => const DashboardScreen(),
+              pageBuilder: (_, __, ___) => const MainNavigationScreen(),
               transitionsBuilder: (_, anim, __, child) => FadeTransition(
                 opacity: anim,
                 child: child,
@@ -382,33 +383,57 @@ class _GlowPainter extends CustomPainter {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// DASHBOARD SCREEN
+// MAIN NAVIGATION SCREEN (Pengganti DashboardScreen lama)
 // ══════════════════════════════════════════════════════════════════════════════
-class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+class MainNavigationScreen extends StatefulWidget {
+  const MainNavigationScreen({super.key});
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen>
-    with SingleTickerProviderStateMixin {
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
 
-  // Entry animation
+  final List<Widget> _pages = [
+    const DashboardPage(),
+    const SupplierScreen(), // Dari supplier.dart
+    const PlaceholderPage(title: 'Kriteria'),
+    const PlaceholderPage(title: 'Hasil Analisis'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: kSurface,
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: _BottomNav(
+        currentIndex: _currentIndex,
+        onTap: (i) => setState(() => _currentIndex = i),
+      ),
+    );
+  }
+}
+
+// ─── Dashboard Page Content ───────────────────────────────────────────────────
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> with SingleTickerProviderStateMixin {
   late final AnimationController _entryCtrl;
   late final List<Animation<double>> _entryFades;
   late final List<Animation<Offset>>  _entrySlides;
-
-  static const int _sectionCount = 5; // header, button, grid, featured, bottom
+  static const int _sectionCount = 4;
 
   @override
   void initState() {
     super.initState();
-    _entryCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-
+    _entryCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
     _entryFades  = List.generate(_sectionCount, (i) =>
       Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
         parent: _entryCtrl,
@@ -423,7 +448,6 @@ class _DashboardScreenState extends State<DashboardScreen>
         ),
       ),
     );
-
     _entryCtrl.forward();
   }
 
@@ -445,7 +469,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     final mq = MediaQuery.of(context);
     return Scaffold(
       backgroundColor: kSurface,
-      // ── Top App Bar ──────────────────────────────────────────────────────
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: Container(
@@ -454,69 +477,54 @@ class _DashboardScreenState extends State<DashboardScreen>
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      // Avatar
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: kSecondaryContainer,
-                        child: Icon(Icons.person, color: kOnSecondaryContainer, size: 22),
-                      ),
-                      const SizedBox(width: 12),
-                      Text('SuppleWise', style: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: kPrimary,
-                        letterSpacing: -0.22,
-                      )),
-                    ],
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: kSecondaryContainer,
+                    child: const Icon(Icons.person, color: kOnSecondaryContainer, size: 22),
                   ),
+                  const SizedBox(width: 12),
+                  const Text('SuppleWise', style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: kPrimary,
+                    letterSpacing: -0.22,
+                  )),
                 ],
               ),
             ),
           ),
         ),
       ),
-
-      // ── Body ─────────────────────────────────────────────────────────────
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(
-          left: 20, right: 20, top: 24,
-          bottom: mq.padding.bottom + 80, // space for bottom nav
-        ),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 0 — Welcome
-              _buildAnimated(0, _WelcomeSection()),
-              const SizedBox(height: 24),
-
-              // 1 — CTA Button
-              _buildAnimated(1, _AddSupplierButton()),
-              const SizedBox(height: 24),
-
-              // 2 — Summary Grid
-              _buildAnimated(2, _SummaryGrid()),
-              const SizedBox(height: 24),
-
-              // 3 — Featured Supplier
-              _buildAnimated(3, _FeaturedSupplierSection()),
-              const SizedBox(height: 8),
-            ],
-          ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAnimated(0, _WelcomeSection()),
+            const SizedBox(height: 24),
+            _buildAnimated(1, _AddSupplierButton()),
+            const SizedBox(height: 24),
+            _buildAnimated(2, _SummaryGrid()),
+            const SizedBox(height: 24),
+            _buildAnimated(3, _FeaturedSupplierSection()),
+          ],
         ),
       ),
+    );
+  }
+}
 
-      // ── Bottom Nav ────────────────────────────────────────────────────────
-      bottomNavigationBar: _BottomNav(
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
-      ),
+// ─── Placeholder Page ─────────────────────────────────────────────────────────
+class PlaceholderPage extends StatelessWidget {
+  final String title;
+  const PlaceholderPage({super.key, required this.title});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title), backgroundColor: kSurface, elevation: 0),
+      body: Center(child: Text('Halaman $title segera hadir', style: const TextStyle(color: kOnSurfaceVariant))),
     );
   }
 }
@@ -599,7 +607,7 @@ class _AddSupplierButtonState extends State<_AddSupplierButton> {
   }
 }
 
-// ─── Summary Grid (2 cards) ───────────────────────────────────────────────────
+// ─── Summary Grid ─────────────────────────────────────────────────────────────
 class _SummaryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -631,14 +639,7 @@ class _SummaryCard extends StatelessWidget {
   final Color    iconBg;
   final String   label;
   final String   value;
-
-  const _SummaryCard({
-    required this.icon,
-    required this.iconColor,
-    required this.iconBg,
-    required this.label,
-    required this.value,
-  });
+  const _SummaryCard({required this.icon, required this.iconColor, required this.iconBg, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -648,41 +649,15 @@ class _SummaryCard extends StatelessWidget {
         color: kSurfaceContainerLowest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: kOutlineVariant.withOpacity(0.30), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0F172A).withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon circle
-          Container(
-            width: 40, height: 40,
-            decoration: BoxDecoration(shape: BoxShape.circle, color: iconBg),
-            child: Icon(icon, color: iconColor, size: 22),
-          ),
+          Container(width: 40, height: 40, decoration: BoxDecoration(shape: BoxShape.circle, color: iconBg), child: Icon(icon, color: iconColor, size: 22)),
           const SizedBox(height: 16),
-          Text(label.toUpperCase(), style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: kOnSurfaceVariant,
-            letterSpacing: 0.6,
-            height: 16 / 12,
-          )),
+          Text(label.toUpperCase(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: kOnSurfaceVariant)),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            color: kOnSurface,
-            letterSpacing: -0.24,
-            height: 32 / 24,
-          )),
+          Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: kOnSurface)),
         ],
       ),
     );
@@ -695,32 +670,14 @@ class _FeaturedSupplierSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Header row
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Supplier Terbaik Saat Ini', style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: kOnSurface,
-              height: 28 / 20,
-            )),
-            GestureDetector(
-              onTap: () {},
-              child: const Text('Lihat Semua', style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: kPrimary,
-                letterSpacing: 0.6,
-              )),
-            ),
+            const Text('Supplier Terbaik Saat Ini', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: kOnSurface)),
+            GestureDetector(onTap: () {}, child: const Text('Lihat Semua', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: kPrimary))),
           ],
         ),
         const SizedBox(height: 16),
-
-        // Featured card
         _FeaturedCard(),
       ],
     );
@@ -733,137 +690,35 @@ class _FeaturedCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: kPrimary,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Stack(
-        clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(color: kPrimary, borderRadius: BorderRadius.circular(8)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Decorative blob (top-right)
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              // Top row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Rank badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.20),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.stars_rounded,
-                                  color: Colors.white, size: 12),
-                              SizedBox(width: 4),
-                              Text('RANK #1', style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                                letterSpacing: 1.2,
-                              )),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-
-                        const Text('Global Logistics Co.', style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 24,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                          letterSpacing: -0.24,
-                          height: 32 / 24,
-                        )),
-                        const SizedBox(height: 4),
-                        Text('Konsistensi pengiriman yang luar biasa.', style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white.withOpacity(0.80),
-                          height: 20 / 14,
-                        )),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-
-                  // Score
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text('98.4', style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        height: 36 / 28,
-                      )),
-                      Text('Decision Score', style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withOpacity(0.70),
-                        letterSpacing: 0.6,
-                      )),
-                    ],
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(999)), child: const Text('RANK #1', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white))),
+                    const SizedBox(height: 8),
+                    const Text('Global Logistics Co.', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: Colors.white)),
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 20),
-
-              // Divider
-              Container(height: 1, color: Colors.white.withOpacity(0.10)),
-              const SizedBox(height: 16),
-
-              // Stats row
-              Row(
-                children: [
-                  _StatChip(icon: Icons.schedule_outlined, label: '99% On-time'),
-                  const SizedBox(width: 16),
-                  _StatChip(icon: Icons.verified_outlined, label: 'Verified Quality'),
-                ],
-              ),
+              const Text('98.4', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white)),
             ],
           ),
+          const SizedBox(height: 16),
+          Container(height: 1, color: Colors.white.withOpacity(0.1)),
+          const SizedBox(height: 16),
+          Row(children: [
+            const Icon(Icons.schedule_outlined, color: Colors.white, size: 16),
+            const SizedBox(width: 4),
+            const Text('99% On-time', style: TextStyle(fontSize: 12, color: Colors.white)),
+          ]),
         ],
       ),
-    );
-  }
-}
-
-class _StatChip extends StatelessWidget {
-  final IconData icon;
-  final String   label;
-  const _StatChip({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: Colors.white, size: 16),
-        const SizedBox(width: 4),
-        Text(label, style: const TextStyle(
-          fontFamily: 'Inter',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-          letterSpacing: 0.3,
-        )),
-      ],
     );
   }
 }
@@ -872,7 +727,6 @@ class _StatChip extends StatelessWidget {
 class _BottomNav extends StatelessWidget {
   final int     currentIndex;
   final void Function(int) onTap;
-
   const _BottomNav({required this.currentIndex, required this.onTap});
 
   static const _items = [
@@ -888,50 +742,25 @@ class _BottomNav extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: kSurfaceContainerLowest,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0F172A).withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: const Color(0xFF0F172A).withOpacity(0.06), blurRadius: 20, offset: const Offset(0, -4))],
       ),
-      padding: EdgeInsets.only(
-        left: 16, right: 16,
-        top: 8,
-        bottom: mq.padding.bottom + 8,
-      ),
+      padding: EdgeInsets.only(top: 8, bottom: mq.padding.bottom + 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(_items.length, (i) {
-          final item    = _items[i];
-          final active  = i == currentIndex;
+          final item = _items[i];
+          final active = i == currentIndex;
           return GestureDetector(
             onTap: () => onTap(i),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              decoration: BoxDecoration(
-                color: active ? kPrimaryContainer.withOpacity(0.18) : Colors.transparent,
-                borderRadius: BorderRadius.circular(999),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(color: active ? kPrimary.withOpacity(0.1) : Colors.transparent, borderRadius: BorderRadius.circular(999)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    active ? item.activeIcon : item.icon,
-                    color: active ? kPrimary : kOnSecondaryContainer,
-                    size: 24,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(item.label, style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: active ? kPrimary : kOnSecondaryContainer,
-                    letterSpacing: 0.6,
-                  )),
+                  Icon(active ? item.activeIcon : item.icon, color: active ? kPrimary : kOnSecondaryContainer, size: 24),
+                  Text(item.label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: active ? kPrimary : kOnSecondaryContainer)),
                 ],
               ),
             ),
