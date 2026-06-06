@@ -35,6 +35,15 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # HTTP client untuk koneksi ke REST API Laravel
+  http: ^1.2.0
+
+  # Local storage untuk token auth
+  shared_preferences: ^2.3.0
+
+  # Google Sign-In (akan dikonfigurasi setelah SHA-1 ready)
+  google_sign_in: ^6.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,33 +1,12 @@
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'theme/app_colors.dart';
 
-void main() {
-  runApp(const SuppleWiseApp());
-}
-
-class SuppleWiseApp extends StatelessWidget {
-  const SuppleWiseApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SuppleWise',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Inter',
-        scaffoldBackgroundColor: const Color(0xFFF8F9FF),
-      ),
-      home: const SplashScreen(),
-    );
-  }
-}
-
-// ─── Color Tokens ─────────────────────────────────────────────────────────────
-const kPrimary               = Color(0xFF006948);
-const kSurface               = Color(0xFFF8F9FF);
-const kOnSurfaceVariant      = Color(0xFF3D4A42);
-const kSurfaceContainerHigh  = Color(0xFFDCE9FF);
+// ─── Color aliases for splash (backward compat) ───────────────────────────────
+const kPrimary               = AppColors.primary;
+const kSurface               = AppColors.surface;
+const kOnSurfaceVariant      = AppColors.onSurfaceVariant;
+const kSurfaceContainerHigh  = AppColors.surfaceContainerHigh;
 
 // ─── Splash Screen ────────────────────────────────────────────────────────────
 class SplashScreen extends StatefulWidget {
@@ -168,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen>
             Positioned.fill(
               child: AnimatedBuilder(
                 animation: _bgOpacity,
-                builder: (_, __) => Center(
+                builder: (_, _) => Center(
                   child: CustomPaint(
                     size: const Size(400, 400),
                     painter: _GlowPainter(opacity: _bgOpacity.value),
@@ -181,7 +160,7 @@ class _SplashScreenState extends State<SplashScreen>
             Center(
               child: AnimatedBuilder(
                 animation: _floatAnim,
-                builder: (_, __) => Transform.translate(
+                builder: (_, _) => Transform.translate(
                   offset: Offset(
                     _parallax.dx,
                     _floatAnim.value + _parallax.dy,
@@ -219,7 +198,7 @@ class _SplashScreenState extends State<SplashScreen>
                           fontFamily:   'Inter',
                           fontSize:     12,
                           fontWeight:   FontWeight.w600,
-                          color:        kOnSurfaceVariant.withOpacity(0.60),
+                          color:        kOnSurfaceVariant.withValues(alpha: 0.60),
                           letterSpacing: 2.4, // ~0.2em
                           height:       16 / 12,
                         ),
@@ -245,7 +224,7 @@ class _SplashScreenState extends State<SplashScreen>
                         height: 4,
                         child: AnimatedBuilder(
                           animation: _progressAnim,
-                          builder: (_, __) => Stack(
+                          builder: (_, _) => Stack(
                             children: [
                               Container(color: kSurfaceContainerHigh),
                               FractionallySizedBox(
@@ -265,7 +244,7 @@ class _SplashScreenState extends State<SplashScreen>
                       fontFamily:  'Inter',
                       fontSize:    14,
                       fontWeight:  FontWeight.w400,
-                      color:       kOnSurfaceVariant.withOpacity(0.40),
+                      color:       kOnSurfaceVariant.withValues(alpha: 0.40),
                       height:      20 / 14,
                     ),
                   ),
@@ -306,7 +285,7 @@ class _SplashScreenState extends State<SplashScreen>
                         fontFamily:   'Inter',
                         fontSize:     12,
                         fontWeight:   FontWeight.w600,
-                        color:        kOnSurfaceVariant.withOpacity(0.20),
+                        color:        kOnSurfaceVariant.withValues(alpha: 0.20),
                         letterSpacing: 0.6,
                       ),
                     ),
@@ -346,14 +325,14 @@ class _LogoWithRing extends StatelessWidget {
           // Pulse ring
           AnimatedBuilder(
             animation: Listenable.merge([pulseScale, pulseOpacity]),
-            builder: (_, __) => Transform.scale(
+            builder: (_, _) => Transform.scale(
               scale: pulseScale.value,
               child: Container(
                 width:  logoSize,
                 height: logoSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: kPrimary.withOpacity(pulseOpacity.value),
+                  color: kPrimary.withValues(alpha: pulseOpacity.value),
                 ),
               ),
             ),
@@ -368,7 +347,7 @@ class _LogoWithRing extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color:       const Color(0xFF006948).withOpacity(0.20),
+                  color:       const Color(0xFF006948).withValues(alpha: 0.20),
                   blurRadius:  40,
                   offset:      const Offset(0, 20),
                 ),
@@ -399,8 +378,8 @@ class _GlowPainter extends CustomPainter {
     final paint  = Paint()
       ..shader = RadialGradient(
         colors: [
-          kPrimary.withOpacity(opacity),
-          kPrimary.withOpacity(0),
+          kPrimary.withValues(alpha: opacity),
+          kPrimary.withValues(alpha: 0),
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, paint);
