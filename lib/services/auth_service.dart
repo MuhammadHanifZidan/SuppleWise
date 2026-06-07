@@ -1,15 +1,17 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import '../models/user.dart';
+import 'api_service.dart';
 
 /// Service untuk mengelola autentikasi.
 ///
 /// Saat ini menyimpan user info secara lokal.
 /// Google Sign-In akan diintegrasikan setelah SHA-1 + Client ID ready.
 class AuthService {
-  static const _keyToken    = 'auth_token';
-  static const _keyUser     = 'auth_user';
+  static const _keyToken = 'auth_token';
+  static const _keyUser = 'auth_user';
 
   static SharedPreferences? _prefs;
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -66,7 +68,7 @@ class AuthService {
     try {
       // Mulai proses login via Google Play Services
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser == null) {
         throw Exception('Login dibatalkan oleh pengguna.');
       }
@@ -84,10 +86,70 @@ class AuthService {
 
       // Sementara menggunakan id Google sebagai token karena belum ada auth backend
       await saveSession(googleUser.id, user);
-      
+
       return user;
     } catch (e) {
       throw Exception('Gagal login dengan Google: $e');
+    }
+  }
+
+  /// Login dengan Email dan Password ke Laravel Backend
+  static Future<User> login(String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['access_token'];
+        final user = User.fromJson(data['user']);
+
+        await saveSession(token, user);
+        return user;
+      } else {
+        final error = jsonDecode(response.body);
+        throw Exception(error['message'] ?? 'Login gagal');
+      }
+    } catch (e) {
+      throw Exception('Gagal login: $e');
+    }
+  }
+
+  /// Register dengan Name, Email dan Password ke Laravel Backend
+  static Future<User> register(
+    String name,
+    String email,
+    String password,
+  ) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/register'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'name': name, 'email': email, 'password': password}),
+      );
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        final token = data['access_token'];
+        final user = User.fromJson(data['user']);
+
+        await saveSession(token, user);
+        return user;
+      } else {
+        final error = jsonDecode(response.body);
+        throw Exception(error['message'] ?? 'Register gagal');
+      }
+    } catch (e) {
+      throw Exception('Gagal register: $e');
     }
   }
 }

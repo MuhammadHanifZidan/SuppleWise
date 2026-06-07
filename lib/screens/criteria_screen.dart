@@ -434,13 +434,6 @@ class _CriteriaScreenState extends State<CriteriaScreen>
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: AppColors.onSurface,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

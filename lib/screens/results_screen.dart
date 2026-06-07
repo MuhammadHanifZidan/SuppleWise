@@ -91,7 +91,6 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back_rounded, color: AppColors.onSurface), onPressed: () => Navigator.pop(context)),
         title: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text('Hasil Keputusan', style: TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.primary)),
           Text('Analisis COPRAS', style: TextStyle(fontFamily: 'Inter', fontSize: 12, color: AppColors.secondary)),
