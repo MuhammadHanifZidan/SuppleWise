@@ -309,25 +309,25 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               const SizedBox(height: 20),
 
               // Verified badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.verified, size: 16, color: AppColors.primaryContainer),
-                  SizedBox(width: 6),
-                  Text('Google Account',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryContainer,
-                        letterSpacing: 0.3,
-                      )),
-                ]),
-              ),
+              // Container(
+              //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              //   decoration: BoxDecoration(
+              //     color: AppColors.primary.withValues(alpha: 0.08),
+              //     borderRadius: BorderRadius.circular(999),
+              //   ),
+              //   child: const Row(mainAxisSize: MainAxisSize.min, children: [
+              //     Icon(Icons.verified, size: 16, color: AppColors.primaryContainer),
+              //     SizedBox(width: 6),
+              //     Text('Google Account',
+              //         style: TextStyle(
+              //           fontFamily: 'Inter',
+              //           fontSize: 12,
+              //           fontWeight: FontWeight.w600,
+              //           color: AppColors.primaryContainer,
+              //           letterSpacing: 0.3,
+              //         )),
+              //   ]),
+              // ),
             ]),
           )),
           const SizedBox(height: 24),

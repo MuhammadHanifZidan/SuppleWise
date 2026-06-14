@@ -65,42 +65,52 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       padding: EdgeInsets.only(
-          left: 16, right: 16, top: 8, bottom: mq.padding.bottom + 8),
+          left: 8, right: 8, top: 8, bottom: mq.padding.bottom + 8),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(items.length, (i) {
           final item = items[i];
           final active = i == _currentIndex;
-          return GestureDetector(
-            onTap: () => _switchTab(i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              decoration: BoxDecoration(
-                color: active
-                    ? AppColors.primaryContainer.withValues(alpha: 0.18)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Icon(active ? item.active : item.icon,
-                    color: active
-                        ? AppColors.primary
-                        : AppColors.onSecondaryContainer,
-                    size: 24),
-                const SizedBox(height: 2),
-                Text(item.label,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => _switchTab(i),
+              behavior: HitTestBehavior.opaque,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: active
+                      ? AppColors.primaryContainer.withValues(alpha: 0.18)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      active ? item.active : item.icon,
                       color: active
                           ? AppColors.primary
                           : AppColors.onSecondaryContainer,
-                      letterSpacing: 0.6,
-                    )),
-              ]),
+                      size: 24,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      item.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: active
+                            ? AppColors.primary
+                            : AppColors.onSecondaryContainer,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           );
         }),

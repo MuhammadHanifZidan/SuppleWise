@@ -66,28 +66,45 @@ class AuthService {
   /// Login dengan Google Sign-In asli
   static Future<User> googleLogin() async {
     try {
-      // Mulai proses login via Google Play Services
+      // 1. Mulai proses login via Google Play Services
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
         throw Exception('Login dibatalkan oleh pengguna.');
       }
 
-      // Opsional: Ambil auth object jika kamu butuh idToken / accessToken
-      // untuk dikirimkan ke backend Laravel.
-      // final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      // final idToken = googleAuth.idToken;
+      // 2. Ambil token autentikasi dari Google
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? accessToken = googleAuth.accessToken;
 
-      final user = User(
-        id: googleUser.id.hashCode, // Hash ID sebagai mock ID numerik
-        name: googleUser.displayName ?? 'Google User',
-        email: googleUser.email,
+      if (accessToken == null) {
+        throw Exception('Gagal mendapatkan access token dari Google.');
+      }
+
+      // 3. Kirim access_token ke backend Laravel
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/login/google'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'access_token': accessToken}),
       );
 
-      // Sementara menggunakan id Google sebagai token karena belum ada auth backend
-      await saveSession(googleUser.id, user);
+      // 4. Proses respons dari Laravel
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['access_token']; // Ini adalah Token Sanctum!
+        final user = User.fromJson(data['user']);
 
-      return user;
+        // Simpan token sanctum dan data user ke memori lokal
+        await saveSession(token, user);
+
+        return user;
+      } else {
+        final error = jsonDecode(response.body);
+        throw Exception(error['message'] ?? 'Login Google via API gagal');
+      }
     } catch (e) {
       throw Exception('Gagal login dengan Google: $e');
     }

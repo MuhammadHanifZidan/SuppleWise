@@ -21,7 +21,7 @@ class ApiService {
     }
     // Ganti IP ini dengan IP Local PC Anda jika menggunakan device fisik
     if (Platform.isAndroid || Platform.isIOS) {
-      return 'http://0.0.0.0:8000/api';
+      return 'http://10.21.153.125:8000/api';
     }
     return 'http://localhost:8000/api';
   }

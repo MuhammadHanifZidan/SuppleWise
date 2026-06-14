@@ -155,7 +155,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
 
                     // ── Stats Row ──
                     _buildAnimated(3, Row(children: [
-                      Expanded(child: _StatMini(icon: Icons.groups_outlined, label: 'Total Supplier', value: '$_supplierCount')),
+                      Expanded(child: _StatMini(icon: Icons.groups_outlined, label: 'Supplier', value: '$_supplierCount')),
                       const SizedBox(width: 12),
                       Expanded(child: _StatMini(icon: Icons.balance_rounded, label: 'Kriteria', value: '${_criterias.length}')),
                     ])),
